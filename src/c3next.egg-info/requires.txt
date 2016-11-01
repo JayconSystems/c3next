@@ -1,5 +1,0 @@
-klein
-txacme
-alchimia
-psycopg2cffi
-pycryptodome
