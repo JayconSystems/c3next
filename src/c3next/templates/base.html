@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="icon" href="img/favicon.ico">
+    {% block head_js %}
+    <script data-main="static/js/dashboard"
+	    src="/static/js/require.min.js"></script>
+    {% endblock %}
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand"
+             href="#"><img src="/static/img/logo.png"></a>
+	  <span id="unit-id"><span>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Help</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      {% block content %}
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="/">Overview <span class="sr-only">(current)</span></a></li>
+            <li><a href="/listeners">Listeners</a></li>
+            <li><a href="/beacons">Beacons</a></li>
+          </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2
+		    main">
+          <h1 class="page-header">Dashboard</h1>
+	  <div class="row">
+	    <div class="col-sm-4 col-md-4">
+	      <h3 class="sub-header">Server</h3>
+	      <dl id="server_status" class="dl-horizontal">
+	      </dl>
+	    </div>
+	    <div class="col-sm-4 col-md-4">
+	      <h3 class="sub-header">Wired</h3>
+	      <dl id="wired_status" class="dl-horizontal">
+		<dt>IP Address:</dt>
+		<dd>192.168.1.5</dd>
+	      </dl>
+	    </div>
+	    <div class="col-sm-4 col-md-4">
+	      <h3 class="sub-header">Wireless</h3>
+	      <dl id="wireless_status" class="dl-horizontal">
+		<dt>SSID:</dt>
+		<dd>C3Wireless</dd>
+		<dt>IP Address:</dt>
+		<dd>192.168.15.5</dd>
+	      </dl>
+	    </div>
+	  </div>
+	  <div class="row">
+	    <div class="col-sm-12 col-md-12">
+	      <h3 class="sub-header">Recent Beacons</h3>
+	      <table id="beacons_table" class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Distance</th>
+		  <th>Estimated Error</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1,001</td>
+                  <td>Lorem</td>
+		  <td>5m</td>
+                </tr>
+                <tr>
+                  <td>1,002</td>
+                  <td>amet</td>
+		  <td>10m</td>
+                </tr>
+              </tbody>
+            </table>
+	    </div>
+          </div>
+	</div>
+      </div>
+      {% endblock content %}
+    </div>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+  </body>
+</html>

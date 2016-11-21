@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %} {{ obj['name'] }} {% endblock %}
+
+{% block head_js %}
+<script data-main="static/js/listener_detail.js"
+	src="/static/js/require.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-3 col-md-2 sidebar">
+    <ul class="nav nav-sidebar">
+      <li><a href="/">Overview <span class="sr-only">(current)</span></a></li>
+      <li><a href="/listeners">Listeners</a></li>
+      <li class="active"><a href="/beacons">Beacons</a></li>
+    </ul>
+  </div>
+  <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">{{ obj }}</h1>
+    <form method="post">
+      <div class="form-group">
+	<label for="name">Name</label>
+	<input name="name"
+	       class="form-control"
+	       id="name"
+	       value="{{ obj['name'] }}" />
+      </div>
+      <input type="submit" class="btn btn-default" value="Save" />
+    </form>
+  </div>
+</div>
+{% endblock %}

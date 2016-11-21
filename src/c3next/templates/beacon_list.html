@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %} Beacons {% endblock %}
+
+{% block head_js %}
+<script data-main="static/js/beacon_list"
+	src="/static/js/require.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-3 col-md-2 sidebar">
+    <ul class="nav nav-sidebar">
+      <li><a href="/">Overview <span class="sr-only">(current)</span></a></li>
+      <li><a href="/listeners">Listeners</a></li>
+      <li class="active"><a href="/beacons">Beacons</a></li>
+    </ul>
+  </div>
+  <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">Beacons</h1>
+    <table class="table table-striped" id="obj_list">
+      <thead>
+	<tr>
+	  <th>Name</th>
+	  <th>ID</th>
+	  <th>Last Seen</th>
+	  <th>Status</th>
+	  <th>Actions</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for obj in obj_list|sort(attribute='last_seen') %}
+	<tr>
+	  <td><a href="/beacons/{{ obj['id']|hexlify }}">{{ obj['name'] }}</a></td>
+	  <td class="monospace">{{ obj['id']|hexlify }}</td>
+	  <td>{{ obj['last_seen']|ago }} near
+	    {{ relation[obj['listener_id']] }}</td>
+	  <td>
+	    {% if obj.missing_p() %}
+	      <span class="label label-danger">Missing</span>
+	    {% else %}
+	      <span class="label label-default">Ok</span>
+	    {% endif %}
+	  </td>
+	  <td><button class="btn delete" id="{{ obj['id']|hexlify }}">Delete</button>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

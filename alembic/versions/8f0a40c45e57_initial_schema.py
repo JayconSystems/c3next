@@ -1,8 +1,8 @@
 """Initial Schema
 
-Revision ID: 4b58d94990c3
+Revision ID: 8f0a40c45e57
 Revises: 
-Create Date: 2016-11-01 10:21:59.167841
+Create Date: 2016-11-21 13:06:41.599839
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4b58d94990c3'
+revision = '8f0a40c45e57'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -38,12 +38,12 @@ def upgrade():
     )
     op.create_table('zones',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('listeners',
     sa.Column('id', sa.Binary(), nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
     sa.Column('zone_id', sa.Integer(), nullable=True),
     sa.Column('last_seen', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['zone_id'], ['zones.id'], ),
@@ -51,7 +51,7 @@ def upgrade():
     )
     op.create_table('beacons',
     sa.Column('id', sa.Binary(), nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
     sa.Column('group_id', sa.Integer(), nullable=True),
     sa.Column('listener_id', sa.Binary(), nullable=True),
     sa.Column('last_seen', sa.DateTime(timezone=True), nullable=True),
@@ -59,6 +59,9 @@ def upgrade():
     sa.Column('dk', sa.BigInteger(), nullable=False),
     sa.Column('clock', sa.BigInteger(), nullable=False),
     sa.Column('clock_origin', sa.Float(), nullable=True),
+    sa.Column('rejected_replay', sa.Integer(), nullable=False),
+    sa.Column('rejected_mac', sa.Integer(), nullable=False),
+    sa.Column('rejected_dk', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['group_id'], ['beacon_groups.id'], ),
     sa.ForeignKeyConstraint(['listener_id'], ['listeners.id'], ),
     sa.PrimaryKeyConstraint('id')

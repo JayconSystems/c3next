@@ -1,0 +1,5 @@
+This directory stores TLS Certificates and key material, it should
+remain empty in version control, but be populated on
+testing/production deployment.
+
+At least a DEFAULT.pem is required that has concatenated key/cert...

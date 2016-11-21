@@ -2,15 +2,18 @@ import sqlalchemy as sa
 from alchimia import TWISTED_STRATEGY
 
 from twisted.internet import reactor
-from twisted.python import log
 
 from .config import DB_URL
 
 ENGINE = sa.create_engine(DB_URL, reactor=reactor,
-                          strategy=TWISTED_STRATEGY
-)
+                          strategy=TWISTED_STRATEGY, pool_size=90)
 
 METADATA = sa.MetaData()
+
+
+def get_connection():
+    return ENGINE.connect()
+
 
 # CREATE TABLE zones (
 #   id serial PRIMARY KEY,
@@ -19,7 +22,7 @@ METADATA = sa.MetaData()
 
 zones = sa.Table('zones', METADATA,
                  sa.Column('id', sa.Integer, primary_key=True),
-                 sa.Column('name', sa.String, nullable=False))
+                 sa.Column('name', sa.String, nullable=True))
 
 # CREATE TABLE beacon_groups (
 #   id serial PRIMARY KEY,
@@ -43,8 +46,9 @@ beacon_groups = sa.Table('beacon_groups', METADATA,
 
 listeners = sa.Table('listeners', METADATA,
                      sa.Column('id', sa.Binary, primary_key=True),
-                     sa.Column('name', sa.String, nullable=False),
-                     sa.Column('zone_id', sa.ForeignKey('zones.id'), nullable=True),
+                     sa.Column('name', sa.String, nullable=True),
+                     sa.Column('zone_id', sa.ForeignKey('zones.id'),
+                               nullable=True),
                      sa.Column('last_seen', sa.DateTime(timezone=True),
                                default=sa.func.now()))
 
@@ -61,7 +65,7 @@ listeners = sa.Table('listeners', METADATA,
 
 beacons = sa.Table('beacons', METADATA,
                    sa.Column('id', sa.Binary, primary_key=True),
-                   sa.Column('name', sa.String, nullable=False),
+                   sa.Column('name', sa.String, nullable=True),
                    sa.Column('group_id',
                              sa.ForeignKey('beacon_groups.id'), nullable=True),
                    sa.Column('listener_id',
@@ -76,8 +80,13 @@ beacons = sa.Table('beacons', METADATA,
                              sa.CheckConstraint('dk>=0<4294967296'),
                              nullable=False),
                    sa.Column('clock_origin', sa.Float,
-                             nullable=True))
-
+                             nullable=True),
+                   sa.Column('rejected_replay', sa.Integer, nullable=False,
+                             default=0),
+                   sa.Column('rejected_mac', sa.Integer, nullable=False,
+                             default=0),
+                   sa.Column('rejected_dk', sa.Integer, nullable=False,
+                             default=0))
 
 # CREATE TABLE beacon_logs (
 #   id serial PRIMARY KEY,
@@ -89,11 +98,11 @@ beacons = sa.Table('beacons', METADATA,
 # CREATE INDEX beacon_logs_timestamp ON beacon_logs(timestamp);
 
 beacon_logs = sa.Table('beacon_logs', METADATA,
-                 sa.Column('id', sa.Integer, primary_key=True),
-                 sa.Column('beacon_id', sa.ForeignKey('beacons.id')),
-                 sa.Column('listener_id', sa.ForeignKey('listeners.id')),
-                 sa.Column('timestamp', sa.DateTime(timezone=True),
-                           nullable=False, default=sa.func.now()))
+                       sa.Column('id', sa.Integer, primary_key=True),
+                       sa.Column('beacon_id', sa.ForeignKey('beacons.id')),
+                       sa.Column('listener_id', sa.ForeignKey('listeners.id')),
+                       sa.Column('timestamp', sa.DateTime(timezone=True),
+                                 nullable=False, default=sa.func.now()))
 
 # CREATE OR REPLACE FUNCTION log_beacon_changes() RETURNS TRIGGER AS $$
 # BEGIN
@@ -126,10 +135,14 @@ users = sa.Table('users', METADATA,
                  sa.Column('id', sa.Integer, primary_key=True),
                  sa.Column('username', sa.String, unique=True, nullable=False),
                  sa.Column('password', sa.String, nullable=False),
-                 sa.Column('first_name', sa.String, nullable=False, default=''),
-                 sa.Column('last_name', sa.String, nullable=False, default=''),
-                 sa.Column('last_login_time', sa.DateTime(timezone=True), nullable=True),
-                 sa.Column('is_active', sa.Boolean, nullable=False, default=True),
+                 sa.Column('first_name', sa.String, nullable=False,
+                           default=''),
+                 sa.Column('last_name', sa.String, nullable=False,
+                           default=''),
+                 sa.Column('last_login_time', sa.DateTime(timezone=True),
+                           nullable=True),
+                 sa.Column('is_active',
+                           sa.Boolean, nullable=False, default=True),
                  sa.Column('email', sa.String, nullable=False, unique=True))
 
 # CREATE USER c3api WITH PASSWORD 'apidemo';
@@ -137,10 +150,6 @@ users = sa.Table('users', METADATA,
 # GRANT ALL ON ALL SEQUENCES IN SCHEMA public to c3api;
 # GRANT CONNECT ON DATABASE c3 to c3api;
 
-def execute(arg, returnsData=True, fetchAll=True):
-    d = ENGINE.execute(arg)
-    if fetchAll and returnsData:
-        d.addCallback(lambda result: result.fetchall())
-    elif returnsData:
-        d.addCallback(lambda result: result.fetchone())
-    return d
+
+def execute(*args, **kwargs):
+    return ENGINE.execute(*args, **kwargs)

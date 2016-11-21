@@ -1,19 +1,14 @@
 from twisted.application import internet, service
-from twisted.internet import reactor
-from twisted.web.static import File
-from klein import Klein
+from c3next.listenerd import ListenerProtocol, DataPersistanceService
+from c3next.web import WebService
 
-app=Klein()
-
-@app.route('/static/', branch=True)
-def static(request):
-    return File("./static")
-
-@app.route('/')
-def home(request):
-    return '<html><h1>hi</h1></html>'
-
-from c3next.listenerd import ListenerProtocol
 application = service.Application("C3Next")
+
 listener_service = internet.UDPServer(9999, ListenerProtocol())
 listener_service.setServiceParent(application)
+
+db_persistance_service = DataPersistanceService(5)
+db_persistance_service.setServiceParent(application)
+
+web_service = WebService("lets:certs:tcp:8443")
+web_service.setServiceParent(application)
