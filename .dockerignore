@@ -1,0 +1,3 @@
+*.egg*
+c3next-env*
+.tox
