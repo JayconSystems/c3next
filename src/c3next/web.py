@@ -10,6 +10,8 @@ from twisted.python import log
 from twisted.web.server import Site
 from twisted.web.static import File
 
+import sqlalchemy as sa
+
 from klein import Klein
 
 import jinja2
@@ -17,6 +19,7 @@ import jinja2
 import c3next.db as db
 from c3next.config import DEFAULT_PER_PAGE
 from c3next.models import Beacon, Listener, BytesEncoder
+from c3next.util import ceildiv
 
 
 @defer.inlineCallbacks
@@ -60,7 +63,7 @@ def index(request):
     return page.render()
 
 
-def query_filter(request, query, search_field=None):
+def query_filter(request, query, search_fields=[]):
     """ Uses requestHeaders to add filtering methods to query"""
     def _last(header, cls=None):
         if header not in request.args:
@@ -75,35 +78,84 @@ def query_filter(request, query, search_field=None):
             return [cls(h) for h in request.args[header]]
         return request.args[header]
 
+    pagination = {}
     limit = _last('limit', cls=int)
     if limit:
-        query = query.limit(limit)
+        pagination['per_page'] = limit
     else:
-        query = query.limit(DEFAULT_PER_PAGE)
+        pagination['per_page'] = DEFAULT_PER_PAGE
+    query = query.limit(pagination['per_page'])
 
-    offset = _last('offset', cls=int)
+    page = _last('p', cls=int)
+    if page:
+        pagination['cur_page'] = page
+        offset = (page - 1) * pagination['per_page']
+    else:
+        offset = _last('offset', cls=int)
+        if offset:
+            pagination['cur_page'] = ceildiv(offset, pagination['per_page'])
     if offset:
         query = query.offset(offset)
+    if 'cur_page' not in pagination:
+        pagination['cur_page'] = 1
 
     search = _all('search')
+    or_payload = []
     for h in search:
-        query = query.where(search_field.like("%"+h+"%"))
+        for sf in search_fields:
+            if isinstance(sf.type, sa.sql.sqltypes.String):
+                or_payload.append(
+                    sa.func.lower(sf).like("%"+sa.func.lower(h)+"%"))
+            elif isinstance(sf.type, sa.sql.sqltypes.Binary):
+                try:
+                    or_payload.append(
+                        sf.like("%"+unhexlify(h[:(len(h)/2)*2])+"%"))
+                except TypeError:
+                    pass
+            else:
+                or_payload.append(
+                    sf.like("%"+h+"%"))
+    query = query.where(sa.or_(*or_payload))
+    print(or_payload)
     log.msg("Filter Query: {}".format(query))
-    return query
+    search = ' '.join([s for s in search])
+    return query, pagination, search
 
 
 def model_rp(rp, cls):
     return [cls(row=r) for r in rp]
 
 
+@defer.inlineCallbacks
+def get_count(table, column=None, conn=None):
+    column = table.c.id if column is None else column
+    query = sa.func.count(column)
+    if conn is None:
+        rp = yield db.execute(query)
+        count = yield rp.scalar()
+        rp.close()
+    else:
+        rp = yield conn.execute(query)
+        count = yield rp.scalar()
+    defer.returnValue(count)
+
+
 @app.route('/beacons')
 @defer.inlineCallbacks
 def b_list(request):
     page = env.get_template('beacon_list.html')
-    query = query_filter(request, db.beacons.select(),
-                         search_field=db.beacons.c.name)
     conn = yield db.get_connection()
+
+    # Todo replace pagination dict with attrs obj
+    query, pagination, search = query_filter(request, db.beacons.select(),
+                                             search_fields=[db.beacons.c.name])
     cur = yield conn.execute(query)
+    if not search:
+        pagination['num_objects'] = yield get_count(db.beacons, conn=conn)
+    else:
+        pagination['num_objects'] = cur.rowcount
+    pagination['num_pages'] = ceildiv(pagination['num_objects'],
+                                      pagination['per_page'])
     results = yield cur.fetchall()
     beacons = model_rp(results, Beacon)
     if request.requestHeaders.hasHeader('Accept'):
@@ -119,21 +171,33 @@ def b_list(request):
     results = yield cur.fetchall()
     listeners = {i['id']: i for i in model_rp(results, Listener)}
     yield conn.close()
-    defer.returnValue(page.render(obj_list=beacons, relation=listeners))
+    defer.returnValue(page.render(obj_list=beacons,
+                                  relation=listeners,
+                                  pagination=pagination,
+                                  search=search))
 
 
 @app.route('/listeners')
 @defer.inlineCallbacks
 def l_list(request):
     page = env.get_template('listener_list.html')
-    query = query_filter(request, db.listeners.select(),
-                         search_field=db.listeners.c.name)
+    query, pagination, search = query_filter(
+        request, db.listeners.select(),
+        search_fields=[db.listeners.c.name, db.listeners.c.id])
     conn = yield db.get_connection()
     cur = yield conn.execute(query)
+    if not search:
+        pagination['num_objects'] = yield get_count(db.listeners, conn=conn)
+    else:
+        pagination['num_objects'] = cur.rowcount
+    pagination['num_pages'] = ceildiv(pagination['num_objects'],
+                                      pagination['per_page'])
     results = yield cur.fetchall()
     listeners = model_rp(results, Listener)
     yield conn.close()
-    defer.returnValue(page.render(obj_list=listeners))
+    defer.returnValue(page.render(obj_list=listeners,
+                                  pagination=pagination,
+                                  search=search))
 
 
 def last_header(headers, header, cls=None):

@@ -1,35 +1,41 @@
 {% extends "base.html" %}
 {% block title %} Listeners {% endblock %}
 
+
+{% block sidebar %}
+<li><a href="/">Overview <span class="sr-only">(current)</span></a></li>
+<li class="active"><a href="/listeners">Listeners</a></li>
+<li><a href="/beacons">Beacons</a></li>
+{% endblock %}
+
+{% block navbar %}
+<form class="navbar-form navbar-right" role="search">
+  <div class="form-group">
+    <input name="search" type="text" class="form-control"
+	   placeholder="Search" value="{{ search }}">
+  </div>
+  <button type="submit" class="btn btn-default">Submit</button>
+</form>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-  <div class="col-sm-3 col-md-2 sidebar">
-    <ul class="nav nav-sidebar">
-      <li><a href="/">Overview <span class="sr-only">(current)</span></a></li>
-      <li class="active"><a href="/listeners">Listeners</a></li>
-      <li><a href="/beacons">Beacons</a></li>
-    </ul>
-  </div>
-  <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-    <h1 class="page-header">Listeners</h1>
-    <table class="table table-striped">
-      <thead>
-	<tr>
-	  <th>Name</th>
-	  <th>ID</th>
-	  <th>Last Seen</th>
-	</tr>
-      </thead>
-      <tbody>
-	{% for obj in obj_list|sort(attribute='last_seen') %}
-	<tr>
-	  <td><a href="/listeners/{{ obj['id']|hexlify }}">{{ obj['name'] }}</a></td>
-	  <td class="monospace">{{ obj['id']|hexlify }}</td>
-	  <td>{{ obj['last_seen']|ago }}</td>
-	</tr>
-	{% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
+<h1 class="page-header">Listeners</h1>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>ID</th>
+      <th>Last Seen</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for obj in obj_list|sort(attribute='last_seen') %}
+    <tr>
+      <td><a href="/listeners/{{ obj['id']|hexlify }}">{{ obj['name'] }}</a></td>
+      <td class="monospace">{{ obj['id']|hexlify }}</td>
+      <td>{{ obj['last_seen']|ago }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}

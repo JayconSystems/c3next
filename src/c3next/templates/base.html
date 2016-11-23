@@ -29,26 +29,30 @@
              href="#"><img src="/static/img/logo.png"></a>
 	  <span id="unit-id"><span>
         </div>
+	{% block navbar %}
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#">Help</a></li>
           </ul>
         </div>
+	{% endblock %}
       </div>
     </nav>
 
     <div class="container-fluid">
-      {% block content %}
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
+	    {% block sidebar %}
             <li class="active"><a href="/">Overview <span class="sr-only">(current)</span></a></li>
             <li><a href="/listeners">Listeners</a></li>
             <li><a href="/beacons">Beacons</a></li>
+	    {% endblock %}
           </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2
 		    main">
+	  {% block content %}
           <h1 class="page-header">Dashboard</h1>
 	  <div class="row">
 	    <div class="col-sm-4 col-md-4">
@@ -99,9 +103,55 @@
             </table>
 	    </div>
           </div>
+	  {% endblock content %}
+	  {% block pagination %}
+	  {% if pagination %}
+	      <nav aria-label="Page navigation" class="text-center">
+      <ul class="pagination">
+	<li {% if pagination['cur_page'] - 1 <= 0 %}
+						class="disabled">
+	    	  <a href="#" aria-label="Previous">
+	    {% else %}
+	  ><a href="?p={{ pagination['cur_page'] - 1 }}"
+	      aria-label="Previous">
+	    {% endif %}
+            <span aria-hidden="true">&laquo;</span>
+	  </a>
+	</li>
+	{% if pagination['cur_page'] - 2 > 0 %}
+	<li><a href="?p={{ pagination['cur_page'] - 2 }}">
+	    {{ pagination['cur_page'] - 2 }}</a></li>
+	{% endif %}
+	{% if pagination['cur_page'] - 1 > 0 %}
+	<li><a href="?p={{ pagination['cur_page'] - 1 }}">
+	    {{ pagination['cur_page'] - 1 }}</a></li>
+	{% endif %}
+	<li class="active"><a href="#">
+	    {{ pagination['cur_page'] }}</a></li>
+	{% if pagination['cur_page'] + 1 <= pagination['num_pages'] %}
+	<li><a href="?p={{ pagination['cur_page'] + 1 }}">
+	    {{ pagination['cur_page'] + 1 }}</a></li>
+	{% endif %}
+	{% if pagination['cur_page'] + 2 <= pagination['num_pages'] %}
+	<li><a href="?p={{ pagination['cur_page'] + 2 }}">
+	    {{ pagination['cur_page'] + 2 }}</a></li>
+	{% endif %}
+	<li
+	  {% if pagination['cur_page'] + 1 > pagination['num_pages'] %}
+	  class="disabled">
+	    <a href="#" aria-label="Next">
+	    {% else %}
+	    ><a href="?p={{ pagination['cur_page'] + 1 }}">
+	    {% endif %}
+            <span aria-hidden="true">&raquo;</span>
+	  </a>
+</li>
+</ul>
+</nav>
+{% endif %}
+{% endblock pagination %}
 	</div>
       </div>
-      {% endblock content %}
     </div>
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>

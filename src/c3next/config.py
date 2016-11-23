@@ -1,11 +1,11 @@
 """ Singleton for storing some default config values """
 import os
-from binascii import hexlify
+from binascii import hexlify, unhexlify
 
 from datetime import timedelta
 
 if 'MASTER_KEY' in os.environ:
-    MASTER_KEY = os.environ['MASTER_KEY']
+    MASTER_KEY = unhexlify(os.environ['MASTER_KEY'])
 else:
     MASTER_KEY = b'\xc3' * 16
     print("Using bogus master key")
@@ -23,7 +23,7 @@ else:
     JWT_EXPIRES = timedelta(hours=6)
 
 if 'DB_URL' in os.environ:
-    DB_URL = os.environ['PG_URL']
+    DB_URL = os.environ['DB_URL']
 else:
     DB_URL = 'postgresql+psycopg2cffi://c3app_live:apidemo@127.0.0.1:5432/'
 

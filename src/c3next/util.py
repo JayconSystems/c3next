@@ -24,3 +24,7 @@ def derive_key(b_id):
     cmac = CMAC.new(MASTER_KEY, ciphermod=AES)
     cmac.update(b_id)
     return cmac.digest()
+
+
+def ceildiv(a, b):
+    return -(-a // b)
