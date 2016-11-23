@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
 	wget \
 	pypy \
+	dirmngr \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/1.2/gosu-$(dpkg --print-architecture)" \
 	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/1.2/gosu-$(dpkg --print-architecture).asc" \
