@@ -10,5 +10,5 @@ listener_service.setServiceParent(application)
 db_persistance_service = DataPersistanceService(5)
 db_persistance_service.setServiceParent(application)
 
-web_service = WebService("lets:certs:tcp:8443")
+web_service = WebService("tcp:8000")
 web_service.setServiceParent(application)
