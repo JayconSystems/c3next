@@ -10,5 +10,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /home/$APPNAME
 COPY . ./
 RUN virtualenv -p /usr/bin/pypy /appenv
-RUN . /appenv/bin/activate; pip install -e .
 CMD . /appenv/bin/activate; twistd -n -y src/$APPNAME/main.py
