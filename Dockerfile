@@ -11,4 +11,4 @@ WORKDIR /home/$APPNAME
 COPY . ./
 RUN python -m virtualenv -p /usr/bin/pypy /appenv
 RUN . /appenv/bin/activate; pip install -e .
-CMD twistd -n -y src/$APPNAME/main.py
+CMD . /appenv/bin/twistd -n -y src/$APPNAME/main.py

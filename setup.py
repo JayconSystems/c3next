@@ -10,7 +10,7 @@ setup (name = 'c3next',
        zip_safe = True,
        tests_require=['pytest'],
        install_requires=['klein','alchimia','psycopg2cffi',
-                         'pycryptodome','jinja2'],
+                         'pycryptodome','jinja2','pytz'],
        package_data={
            '': ['*.html','*.png','*.jpg','*.js']
        }
