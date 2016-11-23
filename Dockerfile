@@ -4,7 +4,7 @@ MAINTAINER Shawn Nock <nock@nocko.se>
 ENV APPNAME c3next
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-	python-virtualenv pypy libffi6 openssl libpq-dev gcc \
+	python-virtualenv pypy libffi6 openssl libpq-dev gcc pypy-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 WORKDIR /home/$APPNAME
