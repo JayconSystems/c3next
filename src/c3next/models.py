@@ -157,7 +157,8 @@ class DirtyContainer(object):
             if private in flat_dict:
                 del flat_dict[private]
         for binary_field in ['id', 'listener_id', 'key']:
-            if binary_field in flat_dict:
+            if (binary_field in flat_dict and
+                flat_dict[binary_field] is not None):
                 flat_dict[binary_field] = hexlify(flat_dict[binary_field])
         return json.dumps(flat_dict, cls=BytesEncoder)
 
@@ -223,6 +224,8 @@ class DirtyContainer(object):
 
 class LastSeenable(DirtyContainer):
     def missing_p(self):
+        if 'last_seen' not in self:
+            return True
         min_age = datetime.now(tz=UTC) - BEACON_LISTENER_TIMEOUT
         return self['last_seen'] < min_age
 

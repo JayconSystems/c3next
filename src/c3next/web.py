@@ -220,7 +220,7 @@ def b_detail(request, hex_id):
             b['name'] = request.args['name'][0]
             yield b.save()
             from listenerd import BEACONS
-            BEACONS[b_id] = b
+            BEACONS[b_id]['name'] = b['name']
     elif request.method == 'DELETE':
         yield b.delete()
         request.setResponseCode(201)
@@ -248,7 +248,7 @@ def l_detail(request, hex_id):
             l['name'] = request.args['name'][0]
             yield l.save()
             from listenerd import LISTENERS
-            LISTENERS[l_id] = l
+            LISTENERS[l_id]['name'] = l['name']
     elif request.method == 'DELETE':
         yield l.delete()
         request.setResponseCode(201)

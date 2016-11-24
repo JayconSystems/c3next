@@ -81,7 +81,8 @@ class ListenerProtocol(protocol.DatagramProtocol):
         try:
             plaintext = cipher.decrypt_and_verify(msg, tag)
         except ValueError as decrypt_verify_error:
-            b['rejected_mac'] += 1
+            if 'rejected_mac' in b:
+                b['rejected_mac'] += 1
             log.err("Payload Decipher Error: {}".format(
                 decrypt_verify_error))
             return
@@ -103,7 +104,8 @@ class ListenerProtocol(protocol.DatagramProtocol):
 
         if b['clock'] and (clock < b['clock']):
             # Reject old clock values
-            b['rejected_replay'] += 1
+            if 'rejected_replay' in b:
+                b['rejected_replay'] += 1
             log.err("Attempted replay of {}@{}".format(b['name'], clock))
             self.transport.write("ACK", peer)
             return
@@ -114,7 +116,10 @@ class ListenerProtocol(protocol.DatagramProtocol):
                       'listener_id': l_id,
                       'last_seen': datetime.now(tz=UTC)})
         else:
-            b['rejected_dk'] += 1
+            if 'rejected_dk' in b:
+                b['rejected_dk'] += 1
+            else:
+                b['rejected_dk'] = 1
             log.msg("Invalid DK")
         self.transport.write("ACK", peer)
 
