@@ -195,6 +195,13 @@ def l_list(request):
     results = yield cur.fetchall()
     listeners = model_rp(results, Listener)
     yield conn.close()
+    if request.requestHeaders.hasHeader('Accept'):
+        accept = request.requestHeaders.getRawHeaders('Accept')[0]
+        if accept.endswith('json'):
+            request.responseHeaders.addRawHeader('Content-Type', accept)
+            defer.returnValue(
+                json.dumps([l.flatten() for l in listeners],
+                           cls=BytesEncoder))
     defer.returnValue(page.render(obj_list=listeners,
                                   pagination=pagination,
                                   search=search))

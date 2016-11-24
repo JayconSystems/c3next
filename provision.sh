@@ -14,7 +14,7 @@ db_url="postgres+psycopg2cffi://${db_user}:${db_pass}@${db_host}/${db}/"
 master_key=$( python -c "from binascii import hexlify; import os; print(hexlify(os.urandom(16)).decode())" )
 
 # Create Database, user, permissions
-ssh $db_host psql -U postgres <<EOF
+ssh roo@$db_host psql -U postgres <<EOF
 CREATE DATABASE $db;
 \connect $db
 CREATE USER $db_user WITH PASSWORD '$db_pass';
@@ -39,6 +39,7 @@ ExecStart=/usr/bin/docker run --name c3next-$name \
 			  -e DB_URL \
 			  -e MASTER_KEY \
                           -p $port:8000 \
+			  -p $port:9999/udp \
                           c3next
 ExecStop=/usr/bin/docker stop c3next-$name
 EOF

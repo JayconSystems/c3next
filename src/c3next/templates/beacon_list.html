@@ -41,7 +41,7 @@
       <td>{{ obj['last_seen']|ago }} near
 	{% if obj['listener_id'] %}
 	<a href="/listeners/{{ obj['listener_id']|hexlify }}">
-	  {{ relation[obj['listener_id']] }}</a></td>
+	  {{ relation[obj['listener_id']]['name'] }}</a></td>
       {% endif %}
       <td>
 	{% if obj.missing_p() %}
