@@ -8,7 +8,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& rm -rf /var/lib/apt/lists/*
 
 WORKDIR /home/$APPNAME
-COPY . ./
 RUN python -m virtualenv -p /usr/bin/pypy /appenv
+COPY requirements.txt .
+RUN . /appenv/bin/activate; pip install -r requirements.txt
+COPY . ./
 RUN . /appenv/bin/activate; pip install -e .
 CMD /appenv/bin/twistd -n -y src/$APPNAME/main.py
