@@ -14,4 +14,4 @@ COPY requirements.txt .
 RUN . /appenv/bin/activate; pip install -r requirements.txt
 COPY . ./
 RUN . /appenv/bin/activate; pip install -e .
-CMD /appenv/bin/twistd -n -y src/$APPNAME/main.py
+CMD docker_entrypoint.sh

@@ -111,6 +111,7 @@ class ListenerProtocol(protocol.DatagramProtocol):
         if b.valid_dk(dk, clock):
             b.update({'dk': dk,
                       'clock': clock,
+                      'listener_id': l_id,
                       'last_seen': datetime.now(tz=UTC)})
         else:
             b['rejected_dk'] += 1
