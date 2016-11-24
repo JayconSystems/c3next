@@ -1,4 +1,4 @@
-alchimia==0.7.1.dev2
+alchimia
 alembic==0.8.8
 Jinja2==2.8
 klein==15.3.1
