@@ -2,6 +2,7 @@ from __future__ import division
 from __future__ import absolute_import
 from __future__ import print_function
 
+from binascii import hexlify
 import struct
 import time
 from datetime import datetime
@@ -37,11 +38,16 @@ class ListenerProtocol(protocol.DatagramProtocol):
 
     def datagramReceived(self, packet, peer):
         HEADER_LENGTH = 3
-        header, _, hostname_len = struct.unpack("BBB", packet[:HEADER_LENGTH])
+        header, _, l_id_len = struct.unpack("BBB", packet[:HEADER_LENGTH])
         packet_type = header & 0x0f
 
         # Create / Fetch eventual consistency listener proxy
-        l_id = packet[HEADER_LENGTH:HEADER_LENGTH+hostname_len]
+        l_id = packet[HEADER_LENGTH:HEADER_LENGTH+l_id_len]
+        if len(l_id) == 12:
+            try:
+                l_id = unhexlify(l_id)
+            except:
+                pass
         if l_id not in LISTENERS:
             l = Listener()
             l['id'] = l_id
@@ -52,12 +58,16 @@ class ListenerProtocol(protocol.DatagramProtocol):
         if packet_type == PacketType.KEEPALIVE:
             self.transport.write("ACK", peer)
             return
+        elif packet_type == PacketType.DATA:
+            log.msg(u"Skipping iBeacon format, currently unimplemented.")
+            self.transport.write("ACK", peer)
+            return
         elif packet_type != PacketType.SECURE:
-            log.err(u"Deprecated/Unknown packet from: {}".format(l_id))
+            log.err(u"Deprecated/Unknown packet from: {}".format(hexlify(l_id)))
             self.transport.write("NACK", peer)
             return
 
-        data = packet[HEADER_LENGTH+hostname_len:]
+        data = packet[HEADER_LENGTH+l_id_len:]
         (b_id, nonce, msg, tag, distance, variance) = struct.unpack(
             "<6s 16s 9s 4s H H", data)
         distance = distance / 100
