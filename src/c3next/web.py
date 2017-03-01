@@ -140,7 +140,7 @@ def b_list(request):
 
     # Todo replace pagination dict with attrs obj
     query, pagination, search = query_filter(request, db.beacons.select(),
-                                             search_fields=[db.beacons.c.name])
+                                             search_fields=[db.beacons.c.name, db.beacons.c.id])
     cur = yield conn.execute(query)
     if not search:
         pagination['num_objects'] = yield get_count(db.beacons, conn=conn)
