@@ -6,3 +6,4 @@ psycopg2cffi==2.7.5
 pytz==2016.7
 Twisted==16.5.0
 pycryptodome==3.4.3
+enum-compat

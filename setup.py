@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup (name = 'c3next',
-       version = '0.1.0',
+       version = '1.5.3',
        packages=find_packages(where="src"),
        package_dir={"": "src"},
        author = "C3 Wireless",
@@ -10,7 +10,8 @@ setup (name = 'c3next',
        zip_safe = True,
        tests_require=['pytest'],
        install_requires=['klein','alchimia','psycopg2cffi',
-                         'pycryptodome','jinja2','pytz','alembic'],
+                         'pycryptodome','jinja2','pytz','alembic',
+                         'six', 'enum-compat'],
        package_data={
            '': ['*.html','*.png','*.jpg','*.js']
        }

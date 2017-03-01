@@ -31,8 +31,8 @@
   <tbody>
     {% for obj in obj_list|sort(attribute='last_seen') %}
     <tr>
-      <td><a href="/listeners/{{ obj['id']|hexlify }}">{{ obj['name'] }}</a></td>
-      <td class="monospace">{{ obj['id']|hexlify }}</td>
+      <td><a href="/listeners/{{ obj['id'] }}">{{ obj['name'] }}</a></td>
+      <td class="monospace">{{ obj['id'] }}</td>
       <td>{{ obj['last_seen']|ago }}</td>
     </tr>
     {% endfor %}

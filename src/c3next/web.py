@@ -1,5 +1,5 @@
 from pkg_resources import resource_filename
-from binascii import unhexlify, hexlify
+from binascii import unhexlify
 from datetime import datetime
 import json
 from pytz import UTC
@@ -23,8 +23,7 @@ from c3next.util import ceildiv
 
 
 @defer.inlineCallbacks
-def del_obj(table, hex_id, cache=None):
-    o_id = unhexlify(hex_id)
+def del_obj(table, o_id, cache=None):
     if cache and o_id in cache:
         del cache[o_id]
     cur = yield db.execute(table.delete().where(table.c.id == o_id))
@@ -48,7 +47,6 @@ def ago(last_seen):
 app = Klein()
 env = jinja2.Environment(
     loader=jinja2.PackageLoader(__name__, 'templates'))
-env.filters['hexlify'] = hexlify
 env.filters['ago'] = ago
 
 
@@ -106,12 +104,6 @@ def query_filter(request, query, search_fields=[]):
             if isinstance(sf.type, sa.sql.sqltypes.String):
                 or_payload.append(
                     sa.func.lower(sf).like("%"+sa.func.lower(h)+"%"))
-            elif isinstance(sf.type, sa.sql.sqltypes.Binary):
-                try:
-                    or_payload.append(
-                        sf.like("%"+unhexlify(h[:(len(h)/2)*2])+"%"))
-                except TypeError:
-                    pass
             else:
                 or_payload.append(
                     sf.like("%"+h+"%"))
@@ -214,10 +206,9 @@ def last_header(headers, header, cls=None):
     return cls(header)
 
 
-@app.route('/beacons/<string:hex_id>', methods=['GET', 'POST', 'DELETE'])
+@app.route('/beacons/<string:b_id>', methods=['GET', 'POST', 'DELETE'])
 @defer.inlineCallbacks
-def b_detail(request, hex_id):
-    b_id = unhexlify(hex_id)
+def b_detail(request, b_id):
     b = yield Beacon.fetch(b_id)
     if not b:
         request.setResponseCode(404)
@@ -227,7 +218,9 @@ def b_detail(request, hex_id):
             b['name'] = request.args['name'][0]
             yield b.save()
             from listenerd import BEACONS
-            BEACONS[b_id]['name'] = b['name']
+            cache_key = unhexlify(b_id)
+            if cache_key in BEACONS:
+                BEACONS[cache_key]['name'] = b['name']
     elif request.method == 'DELETE':
         yield b.delete()
         request.setResponseCode(201)
@@ -244,11 +237,10 @@ def b_detail(request, hex_id):
     defer.returnValue(page.render(obj=b))
 
 
-@app.route('/listeners/<string:hex_id>', methods=['GET', 'POST', 'DELETE'])
+@app.route('/listeners/<string:l_id>', methods=['GET', 'POST', 'DELETE'])
 @defer.inlineCallbacks
-def l_detail(request, hex_id):
+def l_detail(request, l_id):
     page = env.get_template('listener_detail.html')
-    l_id = unhexlify(hex_id)
     l = yield Listener.fetch(l_id)
     if request.method == 'POST':
         if 'name' in request.args:

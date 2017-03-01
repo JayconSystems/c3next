@@ -45,7 +45,7 @@ beacon_groups = sa.Table('beacon_groups', METADATA,
 # );
 
 listeners = sa.Table('listeners', METADATA,
-                     sa.Column('id', sa.Binary, primary_key=True),
+                     sa.Column('id', sa.String, primary_key=True),
                      sa.Column('name', sa.String, nullable=True),
                      sa.Column('zone_id', sa.ForeignKey('zones.id'),
                                nullable=True),
@@ -64,12 +64,12 @@ listeners = sa.Table('listeners', METADATA,
 # );
 
 beacons = sa.Table('beacons', METADATA,
-                   sa.Column('id', sa.Binary, primary_key=True),
+                   sa.Column('id', sa.String, primary_key=True),
                    sa.Column('name', sa.String, nullable=True),
                    sa.Column('group_id',
                              sa.ForeignKey('beacon_groups.id'), nullable=True),
                    sa.Column('listener_id',
-                             sa.ForeignKey('listeners.id')),
+                             sa.ForeignKey('listeners.id'), nullable=True),
                    sa.Column('last_seen', sa.DateTime(timezone=True),
                              default=sa.func.now()),
                    sa.Column('key', sa.Binary, nullable=False),

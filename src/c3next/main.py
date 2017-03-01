@@ -1,10 +1,13 @@
 from twisted.application import internet, service
+from twisted.internet import protocol
 from c3next.listenerd import ListenerProtocol, DataPersistanceService
 from c3next.web import WebService
 
 application = service.Application("C3Next")
 
-listener_service = internet.UDPServer(9999, ListenerProtocol())
+f = protocol.ServerFactory()
+f.protocol = ListenerProtocol
+listener_service = internet.TCPServer(9999, f)
 listener_service.setServiceParent(application)
 
 db_persistance_service = DataPersistanceService(5)

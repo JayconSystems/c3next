@@ -1,4 +1,4 @@
-from binascii import hexlify, unhexlify
+from binascii import hexlify
 from datetime import datetime
 from functools import reduce
 import operator
@@ -43,10 +43,6 @@ class DirtyContainer(object):
             defer.returnValue(results[0])
         else:
             defer.returnValue(None)
-
-    @classmethod
-    def hex_fetch(cls, hex_pk, conn=None):
-        return cls.fetch(unhexlify(hex_pk))
 
     @classmethod
     @defer.inlineCallbacks
@@ -156,10 +152,11 @@ class DirtyContainer(object):
         for private in self._private_fields:
             if private in flat_dict:
                 del flat_dict[private]
-        for binary_field in ['id', 'listener_id', 'key']:
-            if (binary_field in flat_dict and
-                flat_dict[binary_field] is not None):
-                flat_dict[binary_field] = hexlify(flat_dict[binary_field])
+        for binary_field in ['key']:
+            if binary_field in flat_dict:
+                if flat_dict[binary_field] is not None:
+                    flat_dict[binary_field] = hexlify(
+                        flat_dict[binary_field])
         return json.dumps(flat_dict, cls=BytesEncoder)
 
     @defer.inlineCallbacks
@@ -219,7 +216,7 @@ class DirtyContainer(object):
             return "{}: {}".format(self.__class__.__name__,
                                    self['name'])
         return "{} #{}".format(self.__class__.__name__,
-                               hexlify(self[self._pk]))
+                               self[self._pk])
 
 
 class LastSeenable(DirtyContainer):

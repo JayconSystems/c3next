@@ -36,11 +36,11 @@
   <tbody>
     {% for obj in obj_list|sort(attribute='last_seen') %}
     <tr>
-      <td><a href="/beacons/{{ obj['id']|hexlify }}">{{ obj['name'] }}</a></td>
-      <td class="monospace">{{ obj['id']|hexlify }}</td>
+      <td><a href="/beacons/{{ obj['id'] }}">{{ obj['name'] }}</a></td>
+      <td class="monospace">{{ obj['id'] }}</td>
       <td>{{ obj['last_seen']|ago }} near
 	{% if obj['listener_id'] %}
-	<a href="/listeners/{{ obj['listener_id']|hexlify }}">
+	<a href="/listeners/{{ obj['listener_id'] }}">
 	  {{ relation[obj['listener_id']]['name'] }}</a></td>
       {% endif %}
       <td>
@@ -50,7 +50,7 @@
 	<span class="label label-default">Ok</span>
 	{% endif %}
       </td>
-	  <td><button class="btn delete" id="{{ obj['id']|hexlify }}">Delete</button>
+	  <td><button class="btn delete" id="{{ obj['id'] }}">Delete</button>
     </tr>
     {% endfor %}
   </tbody>

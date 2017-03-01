@@ -1,7 +1,7 @@
 """Initial Schema
 
 Revision ID: 8f0a40c45e57
-Revises: 
+Revises:
 Create Date: 2016-11-21 13:06:41.599839
 
 """
@@ -42,7 +42,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('listeners',
-    sa.Column('id', sa.Binary(), nullable=False),
+    sa.Column('id', sa.String(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
     sa.Column('zone_id', sa.Integer(), nullable=True),
     sa.Column('last_seen', sa.DateTime(timezone=True), nullable=True),
@@ -50,10 +50,10 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('beacons',
-    sa.Column('id', sa.Binary(), nullable=False),
+    sa.Column('id', sa.String(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
     sa.Column('group_id', sa.Integer(), nullable=True),
-    sa.Column('listener_id', sa.Binary(), nullable=True),
+    sa.Column('listener_id', sa.String(), nullable=True),
     sa.Column('last_seen', sa.DateTime(timezone=True), nullable=True),
     sa.Column('key', sa.Binary(), nullable=False),
     sa.Column('dk', sa.BigInteger(), nullable=False),
@@ -68,8 +68,8 @@ def upgrade():
     )
     op.create_table('beacon_logs',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('beacon_id', sa.Binary(), nullable=True),
-    sa.Column('listener_id', sa.Binary(), nullable=True),
+    sa.Column('beacon_id', sa.String(), nullable=True),
+    sa.Column('listener_id', sa.String(), nullable=True),
     sa.Column('timestamp', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['beacon_id'], ['beacons.id'], ),
     sa.ForeignKeyConstraint(['listener_id'], ['listeners.id'], ),
